@@ -1,0 +1,10 @@
+{
+  "name": "klarheitskompass-freebie",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Klarheits-Kompass Freebie: interaktives Rad des Lebens mit systeme.io-Anbindung",
+  "engines": {
+    "node": ">=18"
+  }
+}
