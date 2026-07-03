@@ -47,12 +47,12 @@ function isValidEmail(v) {
 }
 
 // Kontakt anlegen; wenn er schon existiert, per E-Mail suchen und Felder patchen.
-async function upsertContact(email, fields) {
-  // 1. Anlegen versuchen
+async function upsertContact(email, firstName, fields) {
+  // 1. Anlegen versuchen (firstName = systeme.io-Standardfeld fuer Personalisierung)
   const create = await sioFetch('/contacts', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, fields })
+    body: JSON.stringify(firstName ? { email, firstName, fields } : { email, fields })
   });
 
   if (create.ok && create.data && create.data.id) {
@@ -77,7 +77,7 @@ async function upsertContact(email, fields) {
   await sioFetch('/contacts/' + found.id, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/merge-patch+json' },
-    body: JSON.stringify({ fields })
+    body: JSON.stringify(firstName ? { firstName, fields } : { fields })
   });
 
   return { id: found.id, created: false };
@@ -129,6 +129,7 @@ module.exports = async function handler(req, res) {
   }
 
   const email = (body.email || '').trim();
+  const firstName = (body.firstName || '').trim();
   if (!isValidEmail(email)) {
     res.status(400).json({ error: 'Ungueltige E-Mail-Adresse.' });
     return;
@@ -145,7 +146,7 @@ module.exports = async function handler(req, res) {
   const tagName = process.env.SYSTEME_TAG_NAME || 'Leadmagnet Rad des Lebens';
 
   try {
-    const contact = await upsertContact(email, fields);
+    const contact = await upsertContact(email, firstName, fields);
     let tagId = null;
     try {
       tagId = await resolveTagId(tagName);
