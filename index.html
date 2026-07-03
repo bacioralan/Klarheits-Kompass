@@ -560,6 +560,7 @@
       </ul>
       <p>Zusätzlich bekommst du per E-Mail die <strong>Blanko-Version des Klarheits-Kompass Workbooks</strong>. Darin kannst du deine Werte aus dem gespeicherten Bild übertragen und deine zwei schwächsten Bereiche gezielt vertiefen.</p>
       <form class="gate-form" id="gateForm" novalidate>
+        <input class="gate-input" type="text" id="gateName" name="firstName" placeholder="Dein Vorname" autocomplete="given-name" required>
         <input class="gate-input" type="email" inputmode="email" id="gateEmail" name="email" placeholder="deine@email.de" autocomplete="email" required>
         <span class="gate-error" id="gateError">Bitte trag eine gültige E-Mail-Adresse ein.</span>
         <button class="btn-primary" type="submit" id="gateSubmit">Mein Ergebnis anzeigen</button>
@@ -939,12 +940,13 @@
   }
 
   // ---------- CRM-ANBINDUNG (systeme.io über Serverless-Funktion) ----------
-  function buildPayload(email){
+  function buildPayload(name, email){
     const c = classify();
     const weak = twoWeakest();
     const values = {};
     DATA.forEach(d=>{ values[d.id] = d.value; });
     return {
+      firstName: name,
       email: email,
       grundtyp: c.key,
       schwaechste_bereiche: namesFor(weak).join(', '),
@@ -953,12 +955,12 @@
     };
   }
 
-  async function submitToCRM(email){
+  async function submitToCRM(name, email){
     try{
       const res = await fetch(CONFIG.apiEndpoint, {
         method:'POST',
         headers:{ 'Content-Type':'application/json' },
-        body: JSON.stringify(buildPayload(email))
+        body: JSON.stringify(buildPayload(name, email))
       });
       if(!res.ok){ console.error('CRM-Antwort nicht ok:', res.status, await res.text()); return false; }
       return true;
@@ -972,14 +974,26 @@
 
   gateForm.addEventListener('submit', function(e){
     e.preventDefault();
+    const name = document.getElementById('gateName').value.trim();
     const email = document.getElementById('gateEmail').value.trim();
-    if(!isValidEmail(email)){ gateError.style.display = 'block'; return; }
+    if(!name){
+      gateError.textContent = 'Bitte trag deinen Vornamen ein.';
+      gateError.style.display = 'block';
+      document.getElementById('gateName').focus();
+      return;
+    }
+    if(!isValidEmail(email)){
+      gateError.textContent = 'Bitte trag eine gültige E-Mail-Adresse ein.';
+      gateError.style.display = 'block';
+      document.getElementById('gateEmail').focus();
+      return;
+    }
     gateError.style.display = 'none';
 
     gateSubmit.disabled = true;
     gateSubmit.textContent = 'Wird geladen …';
 
-    submitToCRM(email);
+    submitToCRM(name, email);
     revealResult();
   });
 
@@ -1007,6 +1021,7 @@
     document.getElementById('weakCards').innerHTML = '';
     document.getElementById('resultSection').classList.remove('is-visible');
     document.getElementById('gateSection').style.display = '';
+    document.getElementById('gateName').value = '';
     document.getElementById('gateEmail').value = '';
     gateSubmit.disabled = false;
     gateSubmit.textContent = 'Mein Ergebnis anzeigen';
