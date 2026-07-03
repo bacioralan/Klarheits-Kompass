@@ -687,9 +687,13 @@
     axesG.appendChild(line);
 
     const a = angleFor(i);
-    const lr = R_OUTER + 34;
-    const lx = 50 + (lr/500*100) * Math.cos(a);
-    const ly = 50 + (lr/500*100) * Math.sin(a);
+    // Labels seitlich weiter nach außen (standen zu nah am Rad); vertikal
+    // unverändert, damit oben (Finanzen) und unten (Emotionale Fitness) — die
+    // bereits perfekt sitzen — exakt gleich bleiben.
+    const lrx = R_OUTER + 56;
+    const lry = R_OUTER + 34;
+    const lx = 50 + (lrx/500*100) * Math.cos(a);
+    const ly = 50 + (lry/500*100) * Math.sin(a);
     const chip = document.createElement('div');
     chip.className = 'label-chip';
     chip.style.left = lx + '%';
