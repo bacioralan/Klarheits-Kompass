@@ -416,9 +416,13 @@
   }
   @media (max-width:560px){
     .weak-cards{grid-template-columns:1fr;}
-    /* Auf schmalen Viewports die Label-Chips schmaler halten, damit sie nicht
-       über den Bildschirmrand hinausragen (verhindert horizontales Scrollen).
-       Betrifft nur Mobile; Desktop bleibt unverändert. */
+    /* Root-Cause-Fix: Das Rad passt sich auf Mobile exakt an den Karten-Innenraum
+       an (statt 92vw, was breiter als die Karte war und rechts über den Viewport
+       hinausragte, weil ein zu breites Element bei margin:auto linksbündig
+       ausbricht). So bleibt alles zentriert und vollständig im Bildschirm. */
+    .wheel-wrap{ width:100%; }
+    /* Label-Chips etwas schmaler halten, damit auch die Beschriftungen sicher
+       innerhalb des Viewports liegen. Betrifft nur Mobile; Desktop unverändert. */
     .label-chip{ width:78px; font-size:9.5px; }
   }
 
@@ -702,8 +706,7 @@
   // über den Viewport-Rand hinausragen — das war die Ursache des horizontalen
   // Scrollens. Vertikal (oben/unten) bleibt überall gleich.
   function layoutLabels(){
-    const wide = window.innerWidth > 560;
-    const lrx = R_OUTER + (wide ? 56 : 22);
+    const lrx = R_OUTER + 56;
     const lry = R_OUTER + 34;
     labelLayer.querySelectorAll('.label-chip').forEach(function(chip){
       const i = parseInt(chip.dataset.index, 10);
