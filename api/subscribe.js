@@ -135,13 +135,19 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  // Der Vorname wird als Standard-Kontaktfeld mit dem Slug "first_name" gesetzt.
+  // Das ist der zuverlaessige Weg: Ein Top-Level "firstName" wird von der
+  // systeme.io-API ignoriert (deshalb kam der Name bisher nicht in der
+  // Kontaktkarte an). "first_name" ist ein eingebautes Standardfeld und
+  // existiert in jedem Account.
+  //
   // Custom Fields -> muessen in systeme.io unter Kontakte als Felder mit
   // exakt diesen Slugs existieren.
-  const fields = [
-    { slug: 'kompass_grundtyp', value: String(body.grundtyp || '') },
-    { slug: 'kompass_schwaechste_bereiche', value: String(body.schwaechste_bereiche || '') },
-    { slug: 'kompass_durchschnitt', value: String(body.durchschnitt || '') }
-  ];
+  const fields = [];
+  if (firstName) fields.push({ slug: 'first_name', value: firstName });
+  fields.push({ slug: 'kompass_grundtyp', value: String(body.grundtyp || '') });
+  fields.push({ slug: 'kompass_schwaechste_bereiche', value: String(body.schwaechste_bereiche || '') });
+  fields.push({ slug: 'kompass_durchschnitt', value: String(body.durchschnitt || '') });
 
   const tagName = process.env.SYSTEME_TAG_NAME || 'Leadmagnet Rad des Lebens';
 
