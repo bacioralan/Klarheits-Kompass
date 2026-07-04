@@ -416,6 +416,10 @@
   }
   @media (max-width:560px){
     .weak-cards{grid-template-columns:1fr;}
+    /* Auf schmalen Viewports die Label-Chips schmaler halten, damit sie nicht
+       über den Bildschirmrand hinausragen (verhindert horizontales Scrollen).
+       Betrifft nur Mobile; Desktop bleibt unverändert. */
+    .label-chip{ width:78px; font-size:9.5px; }
   }
 
   .result-img{
@@ -686,22 +690,30 @@
     line.setAttribute('x2',outer.x); line.setAttribute('y2',outer.y);
     axesG.appendChild(line);
 
-    const a = angleFor(i);
-    // Labels seitlich weiter nach außen (standen zu nah am Rad); vertikal
-    // unverändert, damit oben (Finanzen) und unten (Emotionale Fitness) — die
-    // bereits perfekt sitzen — exakt gleich bleiben.
-    const lrx = R_OUTER + 56;
-    const lry = R_OUTER + 34;
-    const lx = 50 + (lrx/500*100) * Math.cos(a);
-    const ly = 50 + (lry/500*100) * Math.sin(a);
     const chip = document.createElement('div');
     chip.className = 'label-chip';
-    chip.style.left = lx + '%';
-    chip.style.top = ly + '%';
     chip.textContent = d.label;
     chip.dataset.index = i;
     labelLayer.appendChild(chip);
   });
+
+  // Label-Positionen responsiv setzen. Desktop (>560px): Labels seitlich weiter
+  // außen (mehr Luft zum Rad). Mobile (<=560px): enger, damit die Chips NICHT
+  // über den Viewport-Rand hinausragen — das war die Ursache des horizontalen
+  // Scrollens. Vertikal (oben/unten) bleibt überall gleich.
+  function layoutLabels(){
+    const wide = window.innerWidth > 560;
+    const lrx = R_OUTER + (wide ? 56 : 22);
+    const lry = R_OUTER + 34;
+    labelLayer.querySelectorAll('.label-chip').forEach(function(chip){
+      const i = parseInt(chip.dataset.index, 10);
+      const a = angleFor(i);
+      chip.style.left = (50 + (lrx/500*100) * Math.cos(a)) + '%';
+      chip.style.top  = (50 + (lry/500*100) * Math.sin(a)) + '%';
+    });
+  }
+  layoutLabels();
+  window.addEventListener('resize', layoutLabels);
 
   // ---------- MARKER ----------
   const markersG = document.getElementById('markers');
