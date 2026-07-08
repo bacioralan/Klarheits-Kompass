@@ -6,5 +6,8 @@
   "description": "Klarheits-Kompass Freebie: interaktives Rad des Lebens mit systeme.io-Anbindung",
   "engines": {
     "node": ">=18"
+  },
+  "dependencies": {
+    "@vercel/analytics": "^2.0.1"
   }
 }
